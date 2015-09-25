@@ -1,13 +1,34 @@
-bin/
-*.pyc
-*~
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
 
-# autoconf intermediates
-aclocal.m4
-autom4te.cache/
+# Precompiled Headers
+*.gch
+*.pch
 
-# configure script output
-config.h
-config.log
-config.status
-Makefile
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Assembly output
+*.s
+
+# Profiling output
+*out*
