@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -g -mtune=native -march=native -Wall -lpthread
+CXXFLAGS = -std=c++11 -mtune=native -march=native -Wall -lpthread
 assembly= -masm=intel -fverbose-asm -Wa,-alhnsd,-L
 
 all:
