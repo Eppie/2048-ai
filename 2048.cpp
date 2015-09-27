@@ -11,10 +11,6 @@
 
 #include "2048.h"
 
-using namespace std;
-
-typedef unordered_map<board_t, trans_table_entry_t> trans_table_t;
-
 // Transpose rows/columns in a board:
 //   0123       048c
 //   4567  -->  159d
@@ -29,8 +25,6 @@ static inline board_t transpose(board_t x) {
 }
 
 // Count the number of empty positions (= zero nibbles) in a board.
-// Precondition: the board cannot be fully empty.
-	__attribute__ ((__target__ ("popcnt")))
 static int count_empty(board_t x) {
 	x = ~x;
 	x &= x >> 2;
@@ -151,10 +145,10 @@ void init_tables() {
 		row_t rev_result = reverse_row(result);
 		unsigned rev_row = reverse_row(row);
 
-		row_left_table [    row] =                row  ^                result;
-		row_right_table[rev_row] =            rev_row  ^            rev_result;
-		col_up_table   [    row] = unpack_col(    row) ^ unpack_col(    result);
-		col_down_table [rev_row] = unpack_col(rev_row) ^ unpack_col(rev_result);
+		row_left_table[row] = row ^ result;
+		row_right_table[rev_row] = rev_row ^ rev_result;
+		col_up_table[row] = unpack_col( row ) ^ unpack_col( result );
+		col_down_table[rev_row] = unpack_col( rev_row ) ^ unpack_col( rev_result );
 	}
 }
 
@@ -279,11 +273,12 @@ static float score_board( board_t board ) {
 static const float CPROB_THRESH_BASE = 0.0001f;
 static const int CACHE_DEPTH_LIMIT = 15;
 
-static float score_tilechoose_node(eval_state &state, board_t board, float cprob) {
+static float score_tilechoose_node( eval_state &state, board_t board, float cprob ) {
 	if( cprob < CPROB_THRESH_BASE || state.curdepth >= state.depth_limit ) {
 		state.maxdepth = max(state.curdepth, state.maxdepth);
 		return score_heur_board(board);
 	}
+
 	if( state.curdepth < CACHE_DEPTH_LIMIT ) {
 		const trans_table_t::iterator &i = state.trans_table.find(board);
 		if( i != state.trans_table.end() ) {
@@ -306,18 +301,20 @@ static float score_tilechoose_node(eval_state &state, board_t board, float cprob
 	float res = 0.0f;
 	board_t tmp = board;
 	board_t tile_2 = 1;
-	while (tile_2) {
+
+	while( tile_2 ) {
 		if ((tmp & 0xf) == 0) {
-			res += score_move_node(state, board |  tile_2      , cprob * 0.9f) * 0.9f;
-			res += score_move_node(state, board | (tile_2 << 1), cprob * 0.1f) * 0.1f;
+			res += score_move_node( state, board | tile_2, cprob * 0.9f ) * 0.9f;
+			res += score_move_node( state, board | ( tile_2 << 1 ), cprob * 0.1f ) * 0.1f;
 		}
 		tmp >>= 4;
 		tile_2 <<= 4;
 	}
+
 	res = res / num_open;
 
-	if (state.curdepth < CACHE_DEPTH_LIMIT) {
-		trans_table_entry_t entry = {static_cast<uint8_t>(state.curdepth), res};
+	if( state.curdepth < CACHE_DEPTH_LIMIT ) {
+		trans_table_entry_t entry = { static_cast<uint8_t>( state.curdepth ), res };
 		state.trans_table[board] = entry;
 	}
 
@@ -368,6 +365,7 @@ float score_toplevel_move( board_t board, int move ) {
 	elapsed = (finish.tv_sec - start.tv_sec);
 	elapsed += (finish.tv_usec - start.tv_usec) / 1000000.0;
 
+	//printf( "%d,%f,%ld,%d,%d,%.5f,%d\n", move, res, state.moves_evaled, state.cachehits, (int)state.trans_table.size(), elapsed, state.maxdepth );
 	printf("Move %d: result %f: eval'd %ld moves (%d cache hits, %d cache size) in %.2f seconds (maxdepth=%d)\n", move, res,
 			state.moves_evaled, state.cachehits, (int)state.trans_table.size(), elapsed, state.maxdepth);
 
@@ -398,7 +396,8 @@ int find_best_move(board_t board) {
 	pthread_t threads[4];
 	board_state* states[4];
 
-	print_board(board);
+	print_board( board );
+	//log_board( board );
 	printf("Current scores: heur %.0f, actual %.0f\n", score_heur_board(board), score_board(board));
 
 	for( move = 0; move < 4; move++ ) {
