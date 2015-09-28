@@ -2,6 +2,8 @@
 #include <time.h>
 #include <sys/time.h>
 
+using namespace std;
+
 /* The fundamental trick: the 4x4 board is represented as a 64-bit word,
  * with each board square packed into a single 4-bit nibble.
  * 
@@ -22,6 +24,8 @@ struct trans_table_entry_t{
 	float heuristic;
 };
 
+typedef unordered_map<board_t, trans_table_entry_t> trans_table_t;
+
 static const board_t ROW_MASK = 0xFFFFULL;
 static const board_t COL_MASK = 0x000F000F000F000FULL;
 
@@ -35,6 +39,10 @@ static inline void print_board( board_t board ) {
 		printf("\n");
 	}
 	printf("\n");
+}
+
+static inline void log_board( board_t board ) {
+	printf( "%016lX\n", board );
 }
 
 static inline board_t unpack_col( row_t row ) {
