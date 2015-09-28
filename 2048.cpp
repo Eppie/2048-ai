@@ -412,6 +412,8 @@ int find_best_move(board_t board) {
 			best = states[move]->res;
 			bestmove = move;
 		}
+
+		delete states[move];
 	}
 
 	return bestmove;
