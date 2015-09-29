@@ -11,9 +11,7 @@ debug:
 	$(CXX) $(CXXFLAGS) -O0 benchmark.cpp -o bench $(assembly) > bench.s
 
 clean:
-	rm -rf 2048
-	rm -rf bench
-	rm -rf *.s
+	rm -rf 2048 bench *.s *out*
 
 profile: clean all
 	valgrind -v --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes --collect-systime=yes --collect-bus=yes --cache-sim=yes --branch-sim=yes --simulate-hwpref=yes --cacheuse=yes ./2048
