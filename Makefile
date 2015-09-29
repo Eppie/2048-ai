@@ -14,5 +14,8 @@ clean:
 	rm -rf 2048 bench *.s *out*
 
 profile: clean all
-	valgrind -v --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes --collect-systime=yes --collect-bus=yes --cache-sim=yes --branch-sim=yes --simulate-hwpref=yes --cacheuse=yes ./2048
+	valgrind -v --log-fd=1 --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes --collect-systime=yes --collect-bus=yes --cache-sim=yes --branch-sim=yes --simulate-hwpref=yes --cacheuse=yes ./2048
+
+leakcheck: clean all
+	valgrind -v --log-fd=1 --leak-check=full --show-leak-kinds=all --trace-children=yes ./2048
 

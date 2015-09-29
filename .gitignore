@@ -26,6 +26,8 @@
 *.exe
 *.out
 *.app
+2048
+bench
 
 # Assembly output
 *.s
